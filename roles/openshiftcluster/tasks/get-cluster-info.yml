@@ -1,0 +1,84 @@
+---
+- name: Get cluster k8s resource
+  kubernetes.core.k8s_info:
+    api_version: '{{ api_version }}'
+    kind: '{{ kind }}'
+    name: '{{ ansible_operator_meta.name }}'
+    namespace: '{{ ansible_operator_meta.namespace }}'
+  register: result
+
+- set_fact:
+    cluster_resource: '{{ result.resources[0] }}'
+  when: result.resources[0] is defined
+
+- name: Collect information from cluster k8s resource
+  block:
+
+    - name: Get cluster name
+      set_fact:
+        cluster_name: '{{ cluster_resource.status.cluster.name }}'
+      when:
+        - cluster_resource.status.cluster is defined
+        - cluster_resource.status.cluster.name is defined
+
+    - name: Get provider secret name
+      set_fact:
+        provider_secret_name: '{{ cluster_resource.spec.providerSecretRef }}'
+      when:
+        - cluster_resource.spec is defined
+        - cluster_resource.spec.providerSecretRef is defined
+
+    - name: Get provider secret
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: '{{ provider_secret_name }}'
+        namespace: '{{ ansible_operator_meta.namespace }}'
+      register: provider_secret
+      when:
+        - provider_secret_name is defined
+        - provider_secret_name|length > 0
+
+    - name: Get provider access info
+      set_fact:
+        provider_username: "{{ provider_secret.resources[0].data.username | b64decode }}"
+        provider_password: "{{ provider_secret.resources[0].data.password | b64decode }}"
+        product_group_id:  "{{ provider_secret.resources[0].data.product_group_id | b64decode }}"
+      when:
+        - provider_secret.resources[0] is defined
+        - provider_secret.resources[0].data is defined
+
+  when: cluster_resource is defined
+
+- name: Get cluster by name
+  block:
+    - name: Get cluster by name
+      no_log: true
+      uri:
+        url: 'https://ocpapi.svl.ibm.com/v1/ocp/{{ cluster_name }}'
+        method: GET
+        user: '{{ provider_username }}'
+        password: '{{ provider_password }}'
+        force_basic_auth: yes
+        validate_certs: no
+      register: result
+      failed_when: false
+
+    - debug:
+        var: result
+
+    - set_fact:
+        cluster_name: ''
+      when: result.json.cluster_count is not defined
+
+    - set_fact:
+        cluster_name: '{{ result.json.clusters[0].cluster_name }}'
+        cluster_status: '{{ result.json.clusters[0].deployment_status }}'
+        cluster_username: '{{ result.json.clusters[0].ocp_username }}'
+        cluster_password: '{{ result.json.clusters[0].kubeadmin_password }}'
+      when: result.json.cluster_count is defined
+
+  when:
+    - (provider_username is defined) and (provider_username|length > 0)
+    - (provider_password is defined) and (provider_password|length > 0)
+    - (cluster_name is defined) and (cluster_name|length > 0)

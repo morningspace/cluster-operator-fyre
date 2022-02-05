@@ -1,0 +1,7 @@
+---
+# defaults file for OpenShiftCluster
+site: 'svl'
+ocp_version: '4.8.27'
+time_to_live: '36'
+size: 'medium'
+platform: 'x'

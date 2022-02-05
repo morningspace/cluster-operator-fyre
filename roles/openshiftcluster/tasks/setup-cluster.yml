@@ -1,0 +1,46 @@
+---
+- name: Provision new cluster
+  block:
+
+    - name: Provision new cluster
+      no_log: true
+      uri:
+        url: 'https://ocpapi.svl.ibm.com/v1/ocp/'
+        method: POST
+        user: '{{ provider_username }}'
+        password: '{{ provider_password }}'
+        headers:
+          "Content-Type": application/json
+        force_basic_auth: yes
+        validate_certs: no
+        body: '{{ lookup("template","../templates/quickburn.j2") }}'
+        body_format: json
+        status_code: 201
+      register: result
+      failed_when: false
+
+    - debug:
+        var: result
+
+    - set_fact:
+        cluster_name: '{{ result.json.cluster_name }}'
+      when: result.json.cluster_name is defined
+
+  when:
+    - (provider_username is defined) and (provider_username|length > 0)
+    - (provider_password is defined) and (provider_password|length > 0)
+    - (cluster_name is not defined) or (cluster_name|length == 0)
+
+- name: Update cluster status
+  operator_sdk.util.k8s_status:
+    api_version: '{{ api_version }}'
+    kind: '{{ kind }}'
+    name: '{{ ansible_operator_meta.name }}'
+    namespace: '{{ ansible_operator_meta.namespace }}'
+    status:
+      cluster:
+        name: '{{ cluster_name }}'
+        status: '{{ cluster_status | default ("unkown") }}'
+        username: '{{ cluster_username | default ("unkown") }}'
+        password: '{{ cluster_password | default ("unkown") }}'
+  when: (cluster_name is defined) or (cluster_name|length > 0)

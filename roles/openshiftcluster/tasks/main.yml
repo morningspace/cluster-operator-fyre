@@ -1,0 +1,10 @@
+---
+# tasks file for OpenShiftCluster
+
+- include_tasks: get-cluster-info.yml
+
+- include_tasks: setup-cluster.yml
+  when: state is defined and state == 'present'
+
+- include_tasks: teardown-cluster.yml
+  when: state is defined and state == 'absent'

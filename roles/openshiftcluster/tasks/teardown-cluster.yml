@@ -1,0 +1,19 @@
+---
+- name: 'Delete cluster'
+  no_log: true
+  uri:
+    url: 'https://ocpapi.svl.ibm.com/v1/ocp/{{ cluster_name }}'
+    method: DELETE
+    user: '{{ provider_username }}'
+    password: '{{ provider_password }}'
+    force_basic_auth: yes
+    validate_certs: no
+    status_code: 200
+  register: result
+  when:
+    - (provider_username is defined) and (provider_username|length > 0)
+    - (provider_password is defined) and (provider_password|length > 0)
+    - cluster_name is defined
+
+- debug:
+    var: result

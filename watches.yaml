@@ -1,0 +1,12 @@
+---
+# Use the 'create api' subcommand to add watches to this file.
+- version: v1alpha1
+  group: fyre.ibm.com
+  kind: OpenShiftCluster
+  role: openshiftcluster
+  reconcilePeriod: 300s
+  finalizer:
+    name: fyre.ibm.com/finalizer
+    vars:
+      state: absent
+#+kubebuilder:scaffold:watch
