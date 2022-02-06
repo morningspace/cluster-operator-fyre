@@ -17,3 +17,8 @@
 
 - debug:
     var: result
+
+- name: Delete cluster from Argo CD
+  include_tasks: delete-cluster-from-argocd.yml
+  when: argocd.support == true
+

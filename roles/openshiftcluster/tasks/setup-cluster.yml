@@ -39,8 +39,14 @@
     namespace: '{{ ansible_operator_meta.namespace }}'
     status:
       cluster:
+        id: '{{ cluster_id }}'
         name: '{{ cluster_name }}'
         status: '{{ cluster_status | default ("unkown") }}'
         username: '{{ cluster_username | default ("unkown") }}'
         password: '{{ cluster_password | default ("unkown") }}'
+        apiserver: '{{ cluster_apiserver | default ("unkown") }}'
   when: (cluster_name is defined) or (cluster_name|length > 0)
+
+- name: Add cluster to Argo CD
+  include_tasks: add-cluster-to-argocd.yml
+  when: argocd.support == true

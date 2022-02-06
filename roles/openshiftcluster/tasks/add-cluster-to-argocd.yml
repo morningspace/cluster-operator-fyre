@@ -1,0 +1,108 @@
+---
+- name: Add cluster to Argo CD
+  when: (cluster_status is defined) and (cluster_status == 'deployed')
+  block:
+
+    - set_fact:
+        cluster_secret: 'cluster-{{ cluster_apiserver }}-{{ cluster_id }}'
+        cluster_apiserver_url: 'https://{{ cluster_apiserver }}:6443'
+
+    - name: Detect if cluster secret exists
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Secret
+        name: "{{ cluster_secret }}"
+        namespace: "{{ argocd.namespace }}"
+      register: cluster_secret_result
+
+    - debug:
+        var: cluster_secret_result
+
+    - name: Add cluster to Argo CD
+      when: cluster_secret_result.resources[0] is not defined
+      block:
+
+        - name: Log in cluster to obtain access token
+          community.okd.openshift_auth:
+            host: "{{ cluster_apiserver_url }}"
+            username: "{{ cluster_username }}"
+            password: "{{ cluster_password }}"
+            validate_certs: no
+          register: openshift_auth_results
+
+        - debug:
+            var: openshift_auth_results
+
+        - name: Create serviceaccount, clusterrole, clusterrolebinding on target cluster
+          kubernetes.core.k8s:
+            host: "{{ cluster_apiserver_url }}"
+            api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
+            validate_certs: no
+            definition: "{{ lookup('file', 'argocd-rbac.yml') }}"
+            state: present
+          register: result
+
+        - debug:
+            var: result
+
+        - name: Get serviceaccount argocd-manager on target cluster
+          kubernetes.core.k8s_info:
+            host: "{{ cluster_apiserver_url }}"
+            api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
+            validate_certs: no
+            api_version: v1
+            kind: ServiceAccount
+            name: argocd-manager
+            namespace: kube-system
+          register: result
+
+        - debug:
+            var: result
+
+        - set_fact:
+            argocd_manager_secret: "{{ result.resources[0].secrets[0].name }}"
+
+        - debug:
+            var: argocd_manager_secret
+
+        - name: Get secret for serviceaccount argocd-manager on target cluster
+          kubernetes.core.k8s_info:
+            host: "{{ cluster_apiserver_url }}"
+            api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
+            validate_certs: no
+            api_version: v1
+            kind: Secret
+            name: "{{ argocd_manager_secret }}"
+            namespace: kube-system
+          register: result
+
+        - debug:
+            var: result
+
+        - name: Get bearerToken for serviceaccount argocd-manager
+          set_fact:
+            bearer_token: "{{ result.resources[0].data.token | b64decode }}"
+
+        - debug:
+            var: bearer_token
+
+        - set_fact:
+            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | b64encode }}'
+
+        - debug:
+            var: cluster_config
+
+        - name: Create cluster secret for Argo CD
+          kubernetes.core.k8s:
+            state: present
+            template: '../templates/cluster-secret.j2'
+          register: result
+
+        - debug:
+            var: result
+
+        # - name: If login succeeded, try to log out (revoke access token)
+        #   when: openshift_auth_results.openshift_auth.api_key is defined
+        #   community.okd.openshift_auth:
+        #     state: absent
+        #     api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"

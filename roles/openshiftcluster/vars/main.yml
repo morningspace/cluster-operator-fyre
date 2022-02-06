@@ -3,4 +3,6 @@
 kind: 'OpenShiftCluster'
 api_version: 'fyre.ibm.com/v1alpha1'
 state: present
-cluster_exists: false
+argocd:
+  support: true
+  namespace: argocd

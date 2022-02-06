@@ -10,6 +10,8 @@ spec:
     listKind: OpenShiftClusterList
     plural: openshiftclusters
     singular: openshiftcluster
+    shortNames:
+    - fyreocp
   scope: Namespaced
   versions:
   - name: v1alpha1

@@ -1,0 +1,19 @@
+---
+- name: Delete cluster from Argo CD
+  when: (cluster_status is defined) and (cluster_status == 'deployed')
+  block:
+
+    - set_fact:
+        cluster_secret: 'cluster-{{ cluster_apiserver }}-{{ cluster_id }}'
+
+    - name: Delete cluster secret
+      kubernetes.core.k8s:
+        state: absent
+        api_version: v1
+        kind: Secret
+        name: "{{ cluster_secret }}"
+        namespace: "{{ argocd.namespace }}"
+      register: cluster_secret_result
+
+    - debug:
+        var: cluster_secret_result

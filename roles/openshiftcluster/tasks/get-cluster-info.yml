@@ -72,13 +72,26 @@
       when: result.json.cluster_count is not defined
 
     - set_fact:
-        cluster_name: '{{ result.json.clusters[0].cluster_name }}'
-        cluster_status: '{{ result.json.clusters[0].deployment_status }}'
-        cluster_username: '{{ result.json.clusters[0].ocp_username }}'
-        cluster_password: '{{ result.json.clusters[0].kubeadmin_password }}'
+        cluster_id:        "{{ result.json | json_query('clusters[].cluster_id') | first }}"
+        cluster_name:      "{{ result.json | json_query('clusters[].cluster_name') | first }}"
+        cluster_status:    "{{ result.json | json_query('clusters[].deployment_status') | first }}"
+        cluster_username:  "{{ result.json | json_query('clusters[].ocp_username') | first }}"
+        cluster_password:  "{{ result.json | json_query('clusters[].kubeadmin_password') | first }}"
+        cluster_apiserver: "{{ result.json | json_query(cluster_apiserver_query) | first | first }}"
+      vars:
+        cluster_apiserver_query: "clusters[].vms[?starts_with(hostname, 'api.')].hostname"
       when: result.json.cluster_count is defined
 
   when:
     - (provider_username is defined) and (provider_username|length > 0)
     - (provider_password is defined) and (provider_password|length > 0)
     - (cluster_name is defined) and (cluster_name|length > 0)
+
+# - debug:
+#     msg:
+#       - "{{ cluster_id }}"
+#       - "{{ cluster_name }}"
+#       - "{{ cluster_status }}"
+#       - "{{ cluster_username }}"
+#       - "{{ cluster_password }}"
+#       - "{{ cluster_apiserver }}"
