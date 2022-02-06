@@ -2,6 +2,12 @@
 - name: Provision new cluster
   block:
 
+    - debug:
+        msg:
+          - '{{ provider_username }}'
+          - '{{ provider_password }}'
+          - '{{ lookup("template","../templates/quickburn.j2") }}'
+
     - name: Provision new cluster
       no_log: true
       uri:
@@ -39,7 +45,7 @@
     namespace: '{{ ansible_operator_meta.namespace }}'
     status:
       cluster:
-        id: '{{ cluster_id }}'
+        id: '{{ cluster_id | default ("unkown") }}'
         name: '{{ cluster_name }}'
         status: '{{ cluster_status | default ("unkown") }}'
         username: '{{ cluster_username | default ("unkown") }}'

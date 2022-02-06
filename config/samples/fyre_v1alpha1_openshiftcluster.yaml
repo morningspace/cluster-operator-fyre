@@ -2,6 +2,7 @@ apiVersion: fyre.ibm.com/v1alpha1
 kind: OpenShiftCluster
 metadata:
   name: openshiftcluster-sample
+  namespace: fyre-cluster-operator-system
 spec:
   # Add fields here
   providerSecretRef: fyre-secret
