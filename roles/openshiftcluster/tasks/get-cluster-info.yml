@@ -67,9 +67,16 @@
     - debug:
         var: result
 
+    - name: Delete cluster from Argo CD
+      include_tasks: delete-cluster-from-argocd.yml
+      when:
+        - argocd.support == true
+        - result.json.cluster_count is not defined
+    
     - set_fact:
         cluster_name: ''
-      when: result.json.cluster_count is not defined
+      when:
+        - result.json.cluster_count is not defined
 
     - set_fact:
         cluster_id:        "{{ result.json | json_query('clusters[].cluster_id') | first }}"
