@@ -62,3 +62,4 @@ dependencies: []
 collections:
 - operator_sdk.util
 - kubernetes.core
+- community.okd
