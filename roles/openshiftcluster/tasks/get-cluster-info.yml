@@ -77,7 +77,7 @@
         cluster_status:    "{{ result.json | json_query('clusters[].deployment_status') | first }}"
         cluster_username:  "{{ result.json | json_query('clusters[].ocp_username') | first }}"
         cluster_password:  "{{ result.json | json_query('clusters[].kubeadmin_password') | first }}"
-        cluster_apiserver: "{{ result.json | json_query(cluster_apiserver_query) | first | first }}"
+        cluster_apiserver: "{{ result.json | to_json | from_json | json_query(cluster_apiserver_query) | first | first }}"
       vars:
         cluster_apiserver_query: "clusters[].vms[?starts_with(hostname, 'api.')].hostname"
       when: result.json.cluster_count is defined
