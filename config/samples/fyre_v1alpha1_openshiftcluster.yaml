@@ -7,5 +7,5 @@ spec:
   # Add fields here
   providerSecretRef: fyre-secret
   ocpVersion: "4.8.27"
-  timeToLive: "1"
+  timeToLive: 1
   size: "medium"
