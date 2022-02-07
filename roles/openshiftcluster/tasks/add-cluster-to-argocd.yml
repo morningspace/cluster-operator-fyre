@@ -87,7 +87,13 @@
             var: bearer_token
 
         - set_fact:
-            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | to_json | from_json | b64encode }}'
+            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") }}'
+
+        - debug:
+            var: cluster_config
+
+        - set_fact:
+            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | b64encode }}'
 
         - debug:
             var: cluster_config
