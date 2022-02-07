@@ -93,7 +93,7 @@
             var: cluster_config
 
         - set_fact:
-            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | b64encode }}'
+            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | to_nice_json | b64encode }}'
 
         - debug:
             var: cluster_config
