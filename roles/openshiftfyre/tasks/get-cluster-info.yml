@@ -14,12 +14,14 @@
 - name: Collect information from cluster k8s resource
   block:
 
-    - name: Get cluster name
+    - name: Get cluster information
       set_fact:
+        cluster_id: '{{ cluster_resource.status.cluster.id }}'
         cluster_name: '{{ cluster_resource.status.cluster.name }}'
+        cluster_status: '{{ cluster_resource.status.cluster.status }}'
+        cluster_apiserver: '{{ cluster_resource.status.cluster.apiserver }}'
       when:
         - cluster_resource.status.cluster is defined
-        - cluster_resource.status.cluster.name is defined
 
     - name: Get provider secret name
       set_fact:
