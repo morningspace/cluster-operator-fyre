@@ -38,14 +38,14 @@ rules:
       - update
       - watch
   ##
-  ## Rules for fyre.ibm.com/v1alpha1, Kind: OpenShiftCluster
+  ## Rules for clusters.ibm.com/v1alpha1, Kind: OpenShiftFyre
   ##
   - apiGroups:
-      - fyre.ibm.com
+      - clusters.ibm.com
     resources:
-      - openshiftclusters
-      - openshiftclusters/status
-      - openshiftclusters/finalizers
+      - openshiftfyres
+      - openshiftfyres/status
+      - openshiftfyres/finalizers
     verbs:
       - create
       - delete

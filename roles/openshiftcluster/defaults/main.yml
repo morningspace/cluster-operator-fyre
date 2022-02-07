@@ -1,5 +1,5 @@
 ---
-# defaults file for OpenShiftCluster
+# defaults file for OpenShiftFyre
 site: 'svl'
 ocp_version: '4.8.27'
 time_to_live: '36'

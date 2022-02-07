@@ -1,13 +1,13 @@
-# permissions for end users to edit openshiftclusters.
+# permissions for end users to edit openshiftfyres.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: openshiftcluster-editor-role
+  name: openshiftfyre-editor-role
 rules:
 - apiGroups:
-  - fyre.ibm.com
+  - clusters.ibm.com
   resources:
-  - openshiftclusters
+  - openshiftfyres
   verbs:
   - create
   - delete
@@ -17,8 +17,8 @@ rules:
   - update
   - watch
 - apiGroups:
-  - fyre.ibm.com
+  - clusters.ibm.com
   resources:
-  - openshiftclusters/status
+  - openshiftfyres/status
   verbs:
   - get

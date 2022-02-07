@@ -4,13 +4,13 @@ layout:
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: fyre-cluster-operator
+projectName: cluster-operator-fyre
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   domain: ibm.com
-  group: fyre
-  kind: OpenShiftCluster
+  group: clusters
+  kind: OpenShiftFyre
   version: v1alpha1
 version: "3"

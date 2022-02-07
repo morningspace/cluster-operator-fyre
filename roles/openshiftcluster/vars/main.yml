@@ -1,7 +1,7 @@
 ---
-# vars file for OpenShiftCluster
-kind: 'OpenShiftCluster'
-api_version: 'fyre.ibm.com/v1alpha1'
+# vars file for OpenShiftFyre
+api_version: 'clusters.ibm.com/v1alpha1'
+kind: 'OpenShiftFyre'
 state: present
 argocd:
   namespace: argocd

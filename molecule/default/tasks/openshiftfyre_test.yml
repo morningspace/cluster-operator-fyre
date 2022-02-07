@@ -1,5 +1,5 @@
 ---
-- name: Create the fyre.ibm.com/v1alpha1.OpenShiftCluster
+- name: Create the clusters.ibm.com/v1alpha1.OpenShiftFyre
   k8s:
     state: present
     namespace: '{{ namespace }}'
@@ -10,7 +10,7 @@
       type: Successful
       status: "True"
   vars:
-    cr_file: 'fyre_v1alpha1_openshiftcluster.yaml'
+    cr_file: 'clusters_v1alpha1_openshiftfyre.yaml'
 
 - name: Add assertions here
   assert:

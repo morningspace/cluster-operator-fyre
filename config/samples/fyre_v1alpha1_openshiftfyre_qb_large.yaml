@@ -1,0 +1,10 @@
+apiVersion: clusters.ibm.com/v1alpha1
+kind: OpenShiftFyre
+metadata:
+  name: openshiftfyre-qb-large
+  namespace: cluster-operator-fyre-system
+spec:
+  # Add fields here
+  providerSecretRef: fyre-secret
+  ocpVersion: "4.8.27"
+  size: "large"
