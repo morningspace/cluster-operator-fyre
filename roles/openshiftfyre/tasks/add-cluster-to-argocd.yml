@@ -60,7 +60,9 @@
             var: result
 
         - set_fact:
-            argocd_manager_secret: "{{ result.resources[0].secrets[0].name }}"
+            argocd_manager_secret: "{{ result.resources[0] | to_json | from_json | json_query(argocd_secret_query) | first }}"
+          vars:
+            argocd_secret_query: "secrets[?starts_with(name, 'argocd-manager-token-')].name"
 
         - name: Get secret for serviceaccount argocd-manager on target cluster
           kubernetes.core.k8s_info:
