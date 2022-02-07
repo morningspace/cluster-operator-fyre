@@ -8,51 +8,53 @@
   register: result
 
 - set_fact:
-    cluster_resource: '{{ result.resources[0] }}'
   when: result.resources[0] is defined
+    cluster_resource: '{{ result.resources[0] }}'
 
 - name: Collect information from cluster k8s resource
+  when: cluster_resource is defined
   block:
 
     - name: Get cluster information
+      when: cluster_resource.status.cluster is defined
       set_fact:
         cluster_id: '{{ cluster_resource.status.cluster.id }}'
         cluster_name: '{{ cluster_resource.status.cluster.name }}'
         cluster_status: '{{ cluster_resource.status.cluster.status }}'
+        cluster_username: '{{ cluster_resource.status.cluster.username }}'
+        cluster_password: '{{ cluster_resource.status.cluster.password }}'
         cluster_apiserver: '{{ cluster_resource.status.cluster.apiserver }}'
-      when:
-        - cluster_resource.status.cluster is defined
 
     - name: Get provider secret name
-      set_fact:
-        provider_secret_name: '{{ cluster_resource.spec.providerSecretRef }}'
       when:
         - cluster_resource.spec is defined
         - cluster_resource.spec.providerSecretRef is defined
+      set_fact:
+        provider_secret_name: '{{ cluster_resource.spec.providerSecretRef }}'
 
     - name: Get provider secret
+      when: (provider_secret_name is defined) and (provider_secret_name|length > 0)
       kubernetes.core.k8s_info:
         api_version: v1
         kind: Secret
         name: '{{ provider_secret_name }}'
         namespace: '{{ ansible_operator_meta.namespace }}'
       register: provider_secret
-      when:
-        - provider_secret_name is defined
-        - provider_secret_name|length > 0
 
     - name: Get provider access info
+      when:
+        - provider_secret.resources[0] is defined
+        - provider_secret.resources[0].data is defined
       set_fact:
         provider_username: "{{ provider_secret.resources[0].data.username | b64decode }}"
         provider_password: "{{ provider_secret.resources[0].data.password | b64decode }}"
         product_group_id:  "{{ provider_secret.resources[0].data.product_group_id | b64decode }}"
-      when:
-        - provider_secret.resources[0] is defined
-        - provider_secret.resources[0].data is defined
-
-  when: cluster_resource is defined
 
 - name: Get cluster by name
+  when:
+    - (provider_username is defined) and (provider_username|length > 0)
+    - (provider_password is defined) and (provider_password|length > 0)
+    - (cluster_name is defined) and (cluster_name|length > 0)
   block:
     - name: Get cluster by name
       no_log: true
@@ -63,35 +65,33 @@
         password: '{{ provider_password }}'
         force_basic_auth: yes
         validate_certs: no
-      register: result
+      register: cluster_result
       failed_when: false
 
     - debug:
-        var: result
+        var: cluster_result
 
-    - name: Delete cluster from Argo CD
-      include_tasks: delete-cluster-from-argocd.yml
-      when:
-        - argocd.namespace is defined
-        - result.json.cluster_count is not defined
-    
-    - set_fact:
-        cluster_name: ''
-      when:
-        - result.json.cluster_count is not defined
+    - name: Clean up due to cluster not found
+      when: cluster_result.json.cluster_count is not defined
+      block:
+        - name: Delete cluster from Argo CD
+          when: argocd.namespace is defined
+          include_tasks: delete-cluster-from-argocd.yml
+        - set_fact:
+            cluster_name: ''
 
     - set_fact:
-        cluster_id:        "{{ result.json | json_query('clusters[].cluster_id') | first }}"
-        cluster_name:      "{{ result.json | json_query('clusters[].cluster_name') | first }}"
-        cluster_status:    "{{ result.json | json_query('clusters[].deployment_status') | first }}"
-        cluster_username:  "{{ result.json | json_query('clusters[].ocp_username') | first }}"
-        cluster_password:  "{{ result.json | json_query('clusters[].kubeadmin_password') | first }}"
-        cluster_apiserver: "{{ result.json | to_json | from_json | json_query(cluster_apiserver_query) | first | first }}"
+      when: cluster_result.json.cluster_count is defined
+        cluster_id:        "{{ cluster_result.json | json_query('clusters[].cluster_id') | first }}"
+        cluster_name:      "{{ cluster_result.json | json_query('clusters[].cluster_name') | first }}"
+        cluster_status:    "{{ cluster_result.json | json_query('clusters[].deployment_status') | first }}"
+        cluster_username:  "{{ cluster_result.json | json_query('clusters[].ocp_username') | first }}"
+        cluster_password:  "{{ cluster_result.json | json_query('clusters[].kubeadmin_password') | first }}"
+        cluster_apiserver: "{{ cluster_result.json | to_json | from_json | json_query(cluster_apiserver_query) | first | first }}"
       vars:
         cluster_apiserver_query: "clusters[].vms[?starts_with(hostname, 'api.')].hostname"
-      when: result.json.cluster_count is defined
 
-  when:
-    - (provider_username is defined) and (provider_username|length > 0)
-    - (provider_password is defined) and (provider_password|length > 0)
-    - (cluster_name is defined) and (cluster_name|length > 0)
+- debug:
+    msg:
+      - '{{ cluster_name }}'
+      - '{{ cluster_status }}'
