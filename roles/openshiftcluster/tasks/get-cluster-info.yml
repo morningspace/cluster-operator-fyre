@@ -70,7 +70,7 @@
     - name: Delete cluster from Argo CD
       include_tasks: delete-cluster-from-argocd.yml
       when:
-        - argocd.support == true
+        - (argocd.support is defined) and (argocd.support == true)
         - result.json.cluster_count is not defined
     
     - set_fact:
