@@ -16,15 +16,20 @@
         body: '{{ lookup("template","../templates/quickburn.j2") }}'
         body_format: json
         status_code: 201
-      register: result
+      register: new_cluster_result
       failed_when: false
 
     - debug:
-        var: result
+        var: new_cluster_result
 
     - set_fact:
-        cluster_name: '{{ result.json.cluster_name }}'
-      when: result.json.cluster_name is defined
+        cluster_id: 'unknown'
+        cluster_name: '{{ new_cluster_result.json.cluster_name }}'
+        cluster_status: 'unknown'
+        cluster_username: 'unknown'
+        cluster_password: 'unknown'
+        cluster_apiserver: 'unknown'
+      when: new_cluster_result.json.cluster_name is defined
 
   when:
     - (provider_username is defined) and (provider_username|length > 0)
