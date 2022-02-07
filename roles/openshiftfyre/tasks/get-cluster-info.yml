@@ -8,8 +8,8 @@
   register: result
 
 - set_fact:
-  when: result.resources[0] is defined
     cluster_resource: '{{ result.resources[0] }}'
+  when: result.resources[0] is defined
 
 - name: Collect information from cluster k8s resource
   when: cluster_resource is defined
@@ -75,13 +75,12 @@
       when: cluster_result.json.cluster_count is not defined
       block:
         - name: Delete cluster from Argo CD
-          when: argocd.namespace is defined
+          when: (argocd is defined) and (argocd.namespace is defined)
           include_tasks: delete-cluster-from-argocd.yml
         - set_fact:
             cluster_name: ''
 
     - set_fact:
-      when: cluster_result.json.cluster_count is defined
         cluster_id:        "{{ cluster_result.json | json_query('clusters[].cluster_id') | first }}"
         cluster_name:      "{{ cluster_result.json | json_query('clusters[].cluster_name') | first }}"
         cluster_status:    "{{ cluster_result.json | json_query('clusters[].deployment_status') | first }}"
@@ -90,8 +89,9 @@
         cluster_apiserver: "{{ cluster_result.json | to_json | from_json | json_query(cluster_apiserver_query) | first | first }}"
       vars:
         cluster_apiserver_query: "clusters[].vms[?starts_with(hostname, 'api.')].hostname"
+      when: cluster_result.json.cluster_count is defined
 
-- debug:
-    msg:
-      - '{{ cluster_name }}'
-      - '{{ cluster_status }}'
+    - debug:
+        msg:
+          - '{{ cluster_name }}'
+          - '{{ cluster_status }}'

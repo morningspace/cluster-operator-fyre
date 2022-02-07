@@ -3,5 +3,3 @@
 api_version: 'clusters.ibm.com/v1alpha1'
 kind: 'OpenShiftFyre'
 state: present
-argocd:
-  namespace: argocd

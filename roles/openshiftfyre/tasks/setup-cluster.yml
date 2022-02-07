@@ -49,4 +49,4 @@
 
 - name: Add cluster to Argo CD
   include_tasks: add-cluster-to-argocd.yml
-  when: argocd.namespace is defined
+  when: (argocd is defined) and (argocd.namespace is defined)

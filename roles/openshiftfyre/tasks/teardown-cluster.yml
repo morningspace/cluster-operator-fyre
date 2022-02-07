@@ -20,4 +20,4 @@
 
 - name: Delete cluster from Argo CD
   include_tasks: delete-cluster-from-argocd.yml
-  when: argocd.namespace is defined
+  when: (argocd is defined) and (argocd.namespace is defined)
