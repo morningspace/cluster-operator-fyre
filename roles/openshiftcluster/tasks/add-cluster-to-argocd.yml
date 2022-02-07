@@ -62,9 +62,6 @@
         - set_fact:
             argocd_manager_secret: "{{ result.resources[0].secrets[0].name }}"
 
-        - debug:
-            var: argocd_manager_secret
-
         - name: Get secret for serviceaccount argocd-manager on target cluster
           kubernetes.core.k8s_info:
             host: "{{ cluster_apiserver_url }}"
@@ -83,20 +80,8 @@
           set_fact:
             bearer_token: "{{ result.resources[0].data.token | b64decode }}"
 
-        - debug:
-            var: bearer_token
-
-        - set_fact:
-            cluster_config: '{{ lookup("template","../templates/cluster-config.j2") }}'
-
-        - debug:
-            var: cluster_config
-
         - set_fact:
             cluster_config: '{{ lookup("template","../templates/cluster-config.j2") | to_nice_json | b64encode }}'
-
-        - debug:
-            var: cluster_config
 
         - name: Create cluster secret for Argo CD
           kubernetes.core.k8s:
@@ -106,9 +91,3 @@
 
         - debug:
             var: result
-
-        # - name: If login succeeded, try to log out (revoke access token)
-        #   when: openshift_auth_results.openshift_auth.api_key is defined
-        #   community.okd.openshift_auth:
-        #     state: absent
-        #     api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"

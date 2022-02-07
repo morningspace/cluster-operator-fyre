@@ -2,12 +2,6 @@
 - name: Provision new cluster
   block:
 
-    - debug:
-        msg:
-          - '{{ provider_username }}'
-          - '{{ provider_password }}'
-          - '{{ lookup("template","../templates/quickburn.j2") }}'
-
     - name: Provision new cluster
       no_log: true
       uri:
