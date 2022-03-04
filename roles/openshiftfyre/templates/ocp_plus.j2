@@ -2,17 +2,13 @@
   "site": "{{ site }}",
   "product_group_id": {{ product_group_id }},
   "ocp_version": "{{ ocp_version }}",
-  "platform": "{{ platform }}"
+  "platform": "{{ platform }}",
   "worker":  [
     {
       "count": "{{ worker.count }}",
       "cpu": "{{ worker.cpu }}",
       "memory": "{{ worker.memory }}",
-      "additional_disk": [
-        {% for disk in worker.additional_disk %}
-        {{ disk }}
-        {% endfor %}
-      ]
+      "additional_disk": [{% if worker.additional_disk is defined %}{% for disk in worker.additional_disk %} "{{ disk }}" {% if not loop.last %},{% endif %}{% endfor %}{% endif %}]
     }
   ]
 }
