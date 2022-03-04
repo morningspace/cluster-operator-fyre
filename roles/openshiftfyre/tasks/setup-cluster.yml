@@ -13,7 +13,7 @@
           "Content-Type": application/json
         force_basic_auth: yes
         validate_certs: no
-        body: '{{ lookup("template","../templates/quickburn.j2") }}'
+        body: '{{ lookup("template","../templates/{{ quota_type }}.j2") }}'
         body_format: json
         status_code: 201
       register: new_cluster_result

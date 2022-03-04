@@ -1,13 +1,18 @@
 apiVersion: clusters.ibm.com/v1alpha1
 kind: OpenShiftFyre
 metadata:
-  name: openshiftfyre-qb-medium
+  name: openshiftfyre-ocp-plus
   namespace: cluster-operator-fyre-system
 spec:
   # Add fields here
   providerSecretRef: fyre-secret
-  quotaType: "quick_burn"
-  site: "svl"
+  quotaType: "ocp_plus"
+  site: "rtp"
   ocpVersion: "4.8.27"
   platform: "x"
-  size: "medium"
+  worker:
+    count: "3"
+    cpu: "16"
+    memory: "32"
+    additionalDisk:
+    - "100"

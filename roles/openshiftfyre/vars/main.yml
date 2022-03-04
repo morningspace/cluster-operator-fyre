@@ -3,3 +3,4 @@
 api_version: 'clusters.ibm.com/v1alpha1'
 kind: 'OpenShiftFyre'
 state: present
+quota_type: quick_burn

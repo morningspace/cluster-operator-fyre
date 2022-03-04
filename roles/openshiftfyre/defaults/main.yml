@@ -5,3 +5,9 @@ ocp_version: '4.8.27'
 time_to_live: '36'
 size: 'medium'
 platform: 'x'
+worker:
+  count: "3"
+  cpu: "16"
+  memory: "32"
+  additional_disk:
+  - "100"

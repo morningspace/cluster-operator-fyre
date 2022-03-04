@@ -5,6 +5,9 @@ metadata:
 spec:
   # Add fields here
   providerSecretRef: fyre-secret
+  quotaType: "quick_burn"
+  site: "svl"
   ocpVersion: "4.8.27"
-  timeToLive: 1
+  platform: "x"
   size: "medium"
+  timeToLive: 1
