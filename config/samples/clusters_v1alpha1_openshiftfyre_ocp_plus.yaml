@@ -11,7 +11,7 @@ spec:
   ocpVersion: "4.8.27"
   platform: "x"
   worker:
-    count: "3"
+    count: "6"
     cpu: "16"
     memory: "32"
     additionalDisk:
